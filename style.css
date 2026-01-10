@@ -571,10 +571,10 @@ nav a:hover:after {
 }
 
 .review-avatar {
-  width: 56px;
-  height: 56px;
-  min-width: 56px;
-  min-height: 56px;
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  min-height: 64px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
@@ -599,7 +599,7 @@ nav a:hover:after {
   justify-content: center;
   color: var(--primary-dark);
   font-weight: bold;
-  font-size: 20px;
+  font-size: 24px;
   border: 2px dashed var(--primary);
 }
 
@@ -937,6 +937,13 @@ footer {
   .modal-content h3 {
     font-size: 22px;
   }
+  
+  .review-avatar {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1032,34 +1039,4 @@ p, li, .faq-answer {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Улучшение плавности анимаций */
-@media (prefers-reduced-motion: no-preference) {
-  .btn,
-  .feature-card,
-  .step,
-  .review-card,
-  .scroll-to-top,
-  .hero-form,
-  .review-avatar,
-  .faq-question i,
-  nav a:after,
-  .socials a,
-  .modal-close,
-  .modal-overlay {
-    transition: var(--transition);
-  }
-}
-
-/* Для пользователей, предпочитающих уменьшенное движение */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }

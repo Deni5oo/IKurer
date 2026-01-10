@@ -263,8 +263,21 @@ document.addEventListener('DOMContentLoaded', () => {
       this.style.alignItems = 'center';
       this.style.justifyContent = 'center';
       this.style.fontWeight = 'bold';
-      this.style.fontSize = '20px';
+      this.style.fontSize = '24px';
       this.style.color = 'var(--primary-dark)';
     });
   });
+  
+  // Smooth scroll for page load with anchor
+  if (window.location.hash) {
+    setTimeout(() => {
+      const target = document.querySelector(window.location.hash);
+      if (target) {
+        window.scrollTo({
+          top: target.offsetTop - 80,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  }
 });

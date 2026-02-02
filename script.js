@@ -232,6 +232,9 @@ document.addEventListener('click', (e) => {
  * Создает маску для телефона в формате: +7 (___) ___-__-__
  */
 function createPhoneMask(input) {
+  let isDeleting = false;
+  let deleteDirection = null; // 'backward' или 'forward'
+  
   // Устанавливаем начальное значение при фокусе, если поле пустое
   input.addEventListener('focus', function() {
     if (!this.value || this.value.trim() === '') {
@@ -242,11 +245,17 @@ function createPhoneMask(input) {
     }
   });
 
+  // Основной обработчик ввода
   input.addEventListener('input', function(e) {
+    if (isDeleting) {
+      isDeleting = false;
+      return;
+    }
+    
     const cursorPosition = this.selectionStart;
     let value = this.value;
     
-    // Удаляем все нецифровые символы кроме плюса в начале
+    // Сохраняем только цифры
     let digits = value.replace(/\D/g, '');
     
     // Если первый символ 8, заменяем на 7
@@ -265,43 +274,7 @@ function createPhoneMask(input) {
     }
     
     // Форматируем номер
-    let formattedValue = '';
-    if (digits.length >= 1) {
-      formattedValue = '+7';
-    }
-    
-    if (digits.length > 1) {
-      formattedValue += ' (' + digits.substring(1, 4);
-    }
-    
-    if (digits.length >= 4) {
-      formattedValue += ') ' + digits.substring(4, 7);
-    }
-    
-    if (digits.length >= 7) {
-      formattedValue += '-' + digits.substring(7, 9);
-    }
-    
-    if (digits.length >= 9) {
-      formattedValue += '-' + digits.substring(9, 11);
-    }
-    
-    // Добавляем подчеркивания для незаполненных позиций
-    if (digits.length < 4) {
-      formattedValue += '___'.substring(0, 4 - digits.length);
-    }
-    if (digits.length >= 4 && digits.length < 7) {
-      const underscores = 7 - digits.length;
-      formattedValue += '___'.substring(0, underscores);
-    }
-    if (digits.length >= 7 && digits.length < 9) {
-      const underscores = 9 - digits.length;
-      formattedValue += '__'.substring(0, underscores);
-    }
-    if (digits.length >= 9 && digits.length < 11) {
-      const underscores = 11 - digits.length;
-      formattedValue += '__'.substring(0, underscores);
-    }
+    let formattedValue = formatPhoneNumber(digits);
     
     this.value = formattedValue;
     
@@ -309,16 +282,18 @@ function createPhoneMask(input) {
     let newCursorPosition = cursorPosition;
     
     // Если пользователь вводит цифру, продвигаем курсор вперед
-    if (value.length < this.value.length) {
-      // Находим следующую позицию для цифры
-      const currentChar = this.value[newCursorPosition];
-      if (currentChar && !/\d/.test(currentChar)) {
-        newCursorPosition++;
+    if (value.length < formattedValue.length) {
+      // Ищем следующую позицию для цифры
+      for (let i = cursorPosition; i < formattedValue.length; i++) {
+        if (/\d/.test(formattedValue[i]) || formattedValue[i] === '_') {
+          newCursorPosition = i + 1;
+          break;
+        }
       }
     }
     
     // Ограничиваем позицию курсора
-    newCursorPosition = Math.min(newCursorPosition, this.value.length);
+    newCursorPosition = Math.min(newCursorPosition, formattedValue.length);
     
     setTimeout(() => {
       this.setSelectionRange(newCursorPosition, newCursorPosition);
@@ -328,33 +303,120 @@ function createPhoneMask(input) {
   // Обработка клавиш Backspace и Delete
   input.addEventListener('keydown', function(e) {
     const cursorPosition = this.selectionStart;
+    const selectionEnd = this.selectionEnd;
+    const hasSelection = cursorPosition !== selectionEnd;
     
-    // Если нажат Backspace и курсор в начале маски
-    if (e.key === 'Backspace') {
-      if (cursorPosition <= 4) {
-        e.preventDefault();
-        return false;
-      }
+    // Если есть выделение текста, обрабатываем удаление выделенного
+    if (hasSelection && (e.key === 'Backspace' || e.key === 'Delete')) {
+      e.preventDefault();
+      isDeleting = true;
       
-      // Если курсор перед символом маски, перемещаем его назад
-      if (['(', ')', ' ', '-'].includes(this.value[cursorPosition - 1])) {
-        e.preventDefault();
-        this.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
-      }
+      // Получаем цифры из текущего значения
+      let digits = this.value.replace(/\D/g, '');
+      
+      // Определяем, какие цифры удалить
+      const beforeSelection = this.value.substring(0, cursorPosition);
+      const afterSelection = this.value.substring(selectionEnd);
+      
+      // Подсчитываем цифры до и после выделения
+      const digitsBefore = beforeSelection.replace(/\D/g, '').length;
+      const digitsAfter = afterSelection.replace(/\D/g, '').length;
+      
+      // Оставляем цифры до и после выделения
+      digits = digits.substring(0, digitsBefore) + digits.substring(digits.length - digitsAfter);
+      
+      // Форматируем новый номер
+      this.value = formatPhoneNumber(digits);
+      
+      // Устанавливаем курсор в начало выделения
+      setTimeout(() => {
+        this.setSelectionRange(cursorPosition, cursorPosition);
+      }, 0);
+      return;
     }
     
-    // Если нажат Delete и курсор в начале маски
-    if (e.key === 'Delete') {
-      if (cursorPosition < 4) {
-        e.preventDefault();
-        return false;
+    // Обработка Backspace
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      isDeleting = true;
+      deleteDirection = 'backward';
+      
+      if (cursorPosition <= 4) {
+        // Нельзя удалить начало маски
+        return;
       }
       
-      // Если курсор после символа маски, перемещаем его вперед
-      if (['(', ')', ' ', '-'].includes(this.value[cursorPosition])) {
-        e.preventDefault();
-        this.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+      // Получаем цифры из текущего значения
+      let digits = this.value.replace(/\D/g, '');
+      
+      // Находим позицию удаляемой цифры относительно курсора
+      let digitsBeforeCursor = 0;
+      for (let i = 0; i < cursorPosition && i < this.value.length; i++) {
+        if (/\d/.test(this.value[i])) {
+          digitsBeforeCursor++;
+        }
       }
+      
+      // Удаляем цифру перед курсором
+      if (digitsBeforeCursor > 1) { // Не удаляем первую 7
+        const deleteIndex = digitsBeforeCursor - 1;
+        digits = digits.substring(0, deleteIndex) + digits.substring(deleteIndex + 1);
+      }
+      
+      // Форматируем новый номер
+      this.value = formatPhoneNumber(digits);
+      
+      // Находим новую позицию курсора
+      let newCursorPosition = cursorPosition - 1;
+      // Двигаем назад, пока не найдем цифру или начало
+      while (newCursorPosition > 0 && !/\d/.test(this.value[newCursorPosition - 1]) && this.value[newCursorPosition - 1] !== '_') {
+        newCursorPosition--;
+      }
+      
+      setTimeout(() => {
+        this.setSelectionRange(newCursorPosition, newCursorPosition);
+      }, 0);
+      return;
+    }
+    
+    // Обработка Delete
+    if (e.key === 'Delete') {
+      e.preventDefault();
+      isDeleting = true;
+      deleteDirection = 'forward';
+      
+      if (cursorPosition >= this.value.length) {
+        // Курсор в конце, нечего удалять
+        return;
+      }
+      
+      // Получаем цифры из текущего значения
+      let digits = this.value.replace(/\D/g, '');
+      
+      // Находим позицию удаляемой цифры относительно курсора
+      let digitsBeforeCursor = 0;
+      for (let i = 0; i < cursorPosition && i < this.value.length; i++) {
+        if (/\d/.test(this.value[i])) {
+          digitsBeforeCursor++;
+        }
+      }
+      
+      // Удаляем цифру после курсора (если это не первая 7)
+      if (digitsBeforeCursor >= 1 && digits.length > 1) {
+        const deleteIndex = digitsBeforeCursor;
+        if (deleteIndex < digits.length) {
+          digits = digits.substring(0, deleteIndex) + digits.substring(deleteIndex + 1);
+        }
+      }
+      
+      // Форматируем новый номер
+      this.value = formatPhoneNumber(digits);
+      
+      // Оставляем курсор на том же месте
+      setTimeout(() => {
+        this.setSelectionRange(cursorPosition, cursorPosition);
+      }, 0);
+      return;
     }
   });
 
@@ -369,6 +431,53 @@ function createPhoneMask(input) {
       this.classList.add('invalid');
     }
   });
+}
+
+/**
+ * Форматирует номер телефона
+ */
+function formatPhoneNumber(digits) {
+  let formattedValue = '';
+  
+  if (digits.length >= 1) {
+    formattedValue = '+7';
+  }
+  
+  if (digits.length > 1) {
+    formattedValue += ' (' + digits.substring(1, 4);
+  }
+  
+  if (digits.length >= 4) {
+    formattedValue += ') ' + digits.substring(4, 7);
+  }
+  
+  if (digits.length >= 7) {
+    formattedValue += '-' + digits.substring(7, 9);
+  }
+  
+  if (digits.length >= 9) {
+    formattedValue += '-' + digits.substring(9, 11);
+  }
+  
+  // Добавляем подчеркивания для незаполненных позиций
+  if (digits.length < 4) {
+    const underscores = 4 - digits.length;
+    formattedValue += '___'.substring(0, underscores);
+  }
+  if (digits.length >= 4 && digits.length < 7) {
+    const underscores = 7 - digits.length;
+    formattedValue += '___'.substring(0, underscores);
+  }
+  if (digits.length >= 7 && digits.length < 9) {
+    const underscores = 9 - digits.length;
+    formattedValue += '__'.substring(0, underscores);
+  }
+  if (digits.length >= 9 && digits.length < 11) {
+    const underscores = 11 - digits.length;
+    formattedValue += '__'.substring(0, underscores);
+  }
+  
+  return formattedValue;
 }
 
 /**
@@ -474,7 +583,7 @@ function setupFormValidation() {
       
       const digits = phone.value.replace(/\D/g, '');
       if (digits.length !== 11) {
-        errors.push(`Номер телефона должен содержать 11 цифр`);
+        errors.push(`Номер телефона должен содержать 11 цифр (введено: ${digits.length})`);
       } else {
         errors.push('Введите корректный номер телефона');
       }

@@ -1053,7 +1053,7 @@ footer {
 
 /* Дополнительные улучшения для изображений */
 .review-avatar {
-  /* Для высококачественных изображений на Retina-дисплеях */
+  /* Для высококачественных изображений на Retina-экранах */
   @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     /* Изображение будет выглядеть четче */
     image-rendering: -webkit-optimize-contrast;

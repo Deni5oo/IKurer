@@ -74,6 +74,10 @@
         <input type="text" name="name" placeholder="Ваше имя" autocomplete="name" required>
         <input type="text" name="city" placeholder="Ваш город" autocomplete="address-level2" required>
         <input type="tel" name="phone" placeholder="Номер телефона" autocomplete="tel" required>
+        
+        <!-- HONEYPOT FIELD - ловушка для ботов -->
+        <input type="text" name="website" class="honeypot" autocomplete="off" tabindex="-1" aria-hidden="true">
+        
         <input type="hidden" name="utm_block" value="hero">
         <button type="submit" class="btn" style="width:100%;">Стать курьером</button>
         <small>Нажимая кнопку, вы соглашаетесь с <a href="#privacy" id="privacyLink">политикой обработки данных</a></small>

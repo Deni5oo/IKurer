@@ -508,7 +508,7 @@ function validatePhone(phoneValue) {
 }
 
 /**
- * Валидация всей формы
+ * Валидация всей формы с honeypot защитой
  */
 function setupFormValidation() {
   const leadForm = document.getElementById('leadForm');
@@ -531,6 +531,23 @@ function setupFormValidation() {
   
   // Валидация при отправке формы
   leadForm.addEventListener('submit', (e) => {
+    // Проверка honeypot-поля (ловушка для ботов)
+    const honeypot = leadForm.querySelector('.honeypot');
+    if (honeypot && honeypot.value.trim() !== '') {
+      // Это бот, отменяем отправку
+      e.preventDefault();
+      console.log('Обнаружен бот: honeypot-поле заполнено');
+      
+      // Можно добавить скрытую логику для ботов
+      // Например, перенаправить на другую страницу или просто игнорировать
+      if (typeof ym !== 'undefined') {
+        ym(106218469, 'reachGoal', 'bot_detected');
+      }
+      
+      // Не показываем пользователю ошибку, просто молча отменяем
+      return;
+    }
+    
     const name = leadForm.querySelector('input[name="name"]');
     const city = leadForm.querySelector('input[name="city"]');
     const phone = leadForm.querySelector('input[name="phone"]');
@@ -630,6 +647,11 @@ function setupFormValidation() {
       const errorContainer = leadForm.querySelector('.error-container');
       if (errorContainer) {
         errorContainer.remove();
+      }
+      
+      // Удаляем honeypot-поле из формы перед отправкой, чтобы оно не попало в URL
+      if (honeypot) {
+        honeypot.parentNode.removeChild(honeypot);
       }
       
       // Отправляем событие в Яндекс.Метрику

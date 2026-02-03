@@ -906,4 +906,189 @@ footer {
   }
 
   nav {
-   
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: var(--transition);
+    z-index: 998;
+    border-top: 1px solid var(--border);
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  nav a {
+    padding: 8px 0;
+    width: 100%;
+  }
+
+  nav.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .hero-inner {
+    flex-direction: column;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .hero-form {
+    max-width: 100%;
+  }
+
+  .section-title {
+    font-size: 28px;
+  }
+
+  .footer-contacts {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .footer-email {
+    justify-content: center;
+  }
+
+  .footer-socials {
+    justify-content: center;
+  }
+
+  .scroll-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  .modal-content {
+    padding: 24px;
+    max-height: 85vh;
+  }
+
+  .modal-content h3 {
+    font-size: 22px;
+  }
+  
+  .review-avatar {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 28px;
+  }
+  
+  .hero p {
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    font-size: 15px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .section-title {
+    font-size: 24px;
+  }
+  
+  .features-grid,
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .feature-card,
+  .step,
+  .review-card {
+    padding: 20px;
+  }
+  
+  .review-top {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .review-top div {
+    text-align: center;
+  }
+  
+  .footer-bottom {
+    font-size: 11px;
+  }
+  
+  .footer-email {
+    font-size: 14px;
+  }
+  
+  .hero-form {
+    padding: 20px;
+  }
+  
+  .features, .steps, .faq, .reviews {
+    padding: 40px 0;
+  }
+  
+  .hero {
+    padding: 60px 0 40px;
+  }
+  
+  .logo-text {
+    font-size: 18px;
+  }
+  
+  .error-container {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
+
+/* Дополнительные улучшения для изображений */
+.review-avatar {
+  /* Для высококачественных изображений на Retina-экранах */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Изображение будет выглядеть четче */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Улучшение доступности для кнопок и ссылок */
+.btn:focus-visible,
+.header-btn:focus-visible,
+.mobile-menu-btn:focus-visible,
+.modal-close:focus-visible,
+.scroll-to-top:focus-visible,
+nav a:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+/* Улучшение читаемости текста */
+p, li, .faq-answer {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

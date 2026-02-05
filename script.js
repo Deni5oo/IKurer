@@ -651,4 +651,110 @@ function setupFormValidation() {
       
       // Удаляем honeypot-поле из формы перед отправкой, чтобы оно не попало в URL
       if (honeypot) {
-       
+        honeypot.parentNode.removeChild(honeypot);
+      }
+      
+      // Отправляем событие в Яндекс.Метрику
+      if (typeof ym !== 'undefined') {
+        ym(106218469, 'reachGoal', 'form_submitted');
+      }
+      
+      // Форма будет отправлена нормально
+      console.log('Форма валидна, отправка данных...');
+    }
+  });
+  
+  // Real-time валидация при вводе
+  leadForm.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', function() {
+      // Сразу убираем красную обводку при начале ввода
+      this.style.borderColor = '';
+      this.setAttribute('aria-invalid', 'false');
+      
+      // Удаляем сообщение об ошибке
+      const errorContainer = leadForm.querySelector('.error-container');
+      if (errorContainer) {
+        errorContainer.remove();
+      }
+    });
+  });
+}
+
+// ============================================
+// ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Close mobile menu by default
+  nav.classList.remove('active');
+  mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+  mobileMenuBtn.setAttribute('aria-expanded', 'false');
+  
+  // Настройка валидации формы с маской телефона
+  setupFormValidation();
+  
+  // Add animation classes after a short delay for initial load
+  setTimeout(() => {
+    document.querySelectorAll('.feature-card, .step, .review-card').forEach(el => {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        el.classList.add('animate-fadeInUp');
+      }
+    });
+  }, 300);
+  
+  // Handle image errors for review avatars
+  document.querySelectorAll('.review-avatar').forEach(img => {
+    img.addEventListener('error', function() {
+      // Get the first letter of the alt text for the fallback
+      const altText = this.getAttribute('alt') || 'А';
+      const firstLetter = altText.charAt(0);
+      
+      // Replace with fallback
+      this.src = '';
+      this.classList.add('fallback');
+      this.textContent = firstLetter;
+      this.style.display = 'flex';
+      this.style.alignItems = 'center';
+      this.style.justifyContent = 'center';
+      this.style.fontWeight = 'bold';
+      this.style.fontSize = '24px';
+      this.style.color = 'var(--primary-dark)';
+    });
+    
+    // Предзагрузка fallback для изображений, которых может не быть
+    if (!img.complete) {
+      img.addEventListener('load', function() {
+        console.log('Изображение загружено:', this.src);
+      });
+    }
+  });
+  
+  // Smooth scroll for page load with anchor
+  if (window.location.hash && window.location.hash !== '#') {
+    setTimeout(() => {
+      const target = document.querySelector(window.location.hash);
+      if (target) {
+        scrollToElement(window.location.hash);
+      }
+    }, 100);
+  }
+  
+  // Добавляем обработчик для prefers-reduced-motion
+  const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  motionMediaQuery.addEventListener('change', () => {
+    if (motionMediaQuery.matches) {
+      document.querySelectorAll('.animate-fadeInUp').forEach(el => {
+        el.classList.remove('animate-fadeInUp');
+      });
+    }
+  });
+});
+
+// Глобальный обработчик ошибок
+window.addEventListener('error', (event) => {
+  console.error('Ошибка JavaScript:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Необработанное исключение Promise:', event.reason);
+});

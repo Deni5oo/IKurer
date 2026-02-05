@@ -1,0 +1,30 @@
+name: Deploy with Telegram Token
+
+on:
+  push:
+    branches: [ main ]  # <-- ЗАМЕНИТЕ НА [ master ], если нужно
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 1. Клонируем репозиторий на виртуальную машину GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. ПОДСТАВЛЯЕМ СЕКРЕТНЫЙ ТОКЕН ВМЕСТО ПЛЕЙСХОЛДЕРА
+      - name: Inject Telegram Token
+        run: |
+          sed -i "s/TELEGRAM_BOT_TOKEN_PLACEHOLDER/${{ secrets.TELEGRAM_BOT_TOKEN }}/g" index.html
+
+      # 3. РАЗВОРАЧИВАЕМ САЙТ НА GITHUB PAGES
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages  # Создаст отдельную ветку для сайта
+          folder: .         # Берем файлы из корня
+          clean: true       # Очищаем старые файлы
